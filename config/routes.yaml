@@ -1,3 +1,4 @@
-#index:
-#    path: /
-#    controller: App\Controller\DefaultController::index
+calculate_facts:
+  path: /facts/calculate
+  controller: App\Controller\FactsController::calculateFactsExpression
+  methods: POST
