@@ -23,10 +23,15 @@ class FactsController extends AbstractController
         $bodyContent = $request->getContent();
 
         $decodedInformation = $this->validateJSONStructure($bodyContent);
-        $finalData = $this->calculateGivenFacts($decodedInformation['decoded_input'], $decodedInformation['nested']);
-        $finalValue = $this->performFinalCalculation($finalData['function'], $finalData['first_value_data']['final_value'], $finalData['second_value_data']['final_value']);
-
-        dd($finalValue);
+        $finalData = $this->calculateGivenFacts(
+            $decodedInformation['decoded_input'],
+            $decodedInformation['nested']
+        );
+        $finalValue = $this->performFinalCalculation(
+            $finalData['function'],
+            $finalData['first_value_data']['final_value'],
+            $finalData['second_value_data']['final_value']
+        );
 
         return new JsonResponse(['value' => $finalValue]);
     }
@@ -127,7 +132,29 @@ class FactsController extends AbstractController
 
             // Otherwise, the calculation needs to be done on each nested part first
         } else {
-            return [];
+            $restructuredDataA = ['expression' => $data['expression']['a'], 'security' => $data['security']];
+            $restructuredDataB = ['expression' => $data['expression']['b'], 'security' => $data['security']];
+
+            $firstDataset = $this->calculateGivenFacts($restructuredDataA, false);
+            $secondDataset = $this->calculateGivenFacts($restructuredDataB, false);
+
+            $finalFirstValue = $this->performFinalCalculation(
+                $firstDataset['function'],
+                $firstDataset['first_value_data']['final_value'],
+                $firstDataset['second_value_data']['final_value']
+            );
+
+            $finalSecondValue = $this->performFinalCalculation(
+                $secondDataset['function'],
+                $secondDataset['first_value_data']['final_value'],
+                $secondDataset['second_value_data']['final_value']
+            );
+
+            return [
+                'function' => $data['expression']['fn'],
+                'first_value_data' => ['final_value' => $finalFirstValue],
+                'second_value_data' => ['final_value' => $finalSecondValue]
+            ];
         }
     }
 
