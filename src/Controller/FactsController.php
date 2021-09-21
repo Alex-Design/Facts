@@ -231,7 +231,7 @@ class FactsController extends AbstractController
             case '/':
                 return $firstValue / $secondValue;
             default:
-                throw new \InvalidArgumentException('Function ' . $function . ' not implemented for calculation.');
+                throw new BadRequestHttpException('Function ' . $function . ' has not implemented for calculations.');
         }
     }
 }
